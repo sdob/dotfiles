@@ -1,28 +1,6 @@
-#export  i3 config file (v4)
-#
-# Please see http://i3wm.org/docs/userguide.html for a complete reference!
-#
-# This config file uses keycodes (bindsym) and was written for the QWERTY
-# layout.
-#
-# To get a config file with the same key positions, but for your current
-# layout, use the i3-config-wizard
-#
-
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 font pango:monospace 8
-
-# This font is widely installed, provides lots of unicode glyphs, right-to-left
-# text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font pango:DejaVu Sans Mono 8
-
-# Before i3 v4.8, we used to recommend this one as the default:
-# font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
-# The font above is very space-efficient, that is, it looks good, sharp and
-# clear in small sizes. However, its unicode glyph coverage is limited, the old
-# X core fonts rendering does not support right-to-left and this being a bitmap
-# font, it doesn’t scale on retina/hidpi displays.
 
 # Set modifier to Windows key
 set $mod Mod4
@@ -35,10 +13,10 @@ set $left j
 set $right semicolon
 
 # use Mouse+Mod4 to drag floating windows to their wanted position
-floating_modifier Mod4
+floating_modifier $mod
 
 # start a terminal
-bindsym Mod4+Return exec i3-sensible-terminal
+bindsym Mod4+Return exec gnome-terminal
 
 # kill focused window
 bindsym Mod4+Shift+q kill
@@ -139,12 +117,17 @@ bindsym Control+Mod1+Left workspace prev
 bindsym Control+Shift+Mod1+Right move container to workspace next
 bindsym Control+Shift+Mod1+Left move container to workspace prev
 
+# Show focus
+
 # reload the configuration file
 bindsym Mod4+Shift+c reload
+
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym Mod4+Shift+r restart
+
 # exit i3 (logs you out of your X session)
-bindsym Mod4+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+#bindsym Mod4+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+bindsym $mod+Shift+e exec "i3-msg exit"
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -177,23 +160,60 @@ bindsym Mod4+r mode "resize"
 bar {
         status_command i3status
         tray_output primary
+        font pango:monospace 8
+        font pango:Inconsolata, FontAwesome Regular 10 
+        separator_symbol "·"
+  colors {
+    separator #93A1A1
+  }
 }
 
 # Lock screen on control+alt+l
-bindsym Control+Mod1+l exec i3lock
+bindsym Control+Mod1+l exec "~/.bin/lock.sh"
 
-#######################################################################
-# automatically start i3-config-wizard to offer the user to create a
-# keysym-based config which used their favorite modifier (alt or windows)
-#
-# i3-config-wizard will not launch if there already is a config file
-# in ~/.i3/config.
-#
-# Please remove the following exec line:
-#######################################################################
-#exec i3-config-wizard
-
-exec check_external.sh
-exec set_caps_lock_to_escape.sh
 # Start nm-applet
 exec --no-startup-id nm-applet
+exec --no-startup-id setxkbmap -layout 'ie'
+exec_always --no-startup-id ~/.bin/set_caps_lock_to_escape.sh
+
+# Start Compton
+exec --no-startup-id compton --opacity-rule '100:window_type = "dock" && class_g = "i3bar"' --config ~/.config/compton.conf -b
+# exec compton -bc --config ~/.config.compton.conf
+
+# Start unity-settings-daemon
+exec --no-startup-id unity-settings-daemon
+
+# Set desktop background to solid black
+exec --no-startup-id hsetroot -solid "#000000"
+
+# Exec startup apps
+exec --no-startup-id i3-msg 'workspace 1; exec google-chrome &'
+
+# colours
+# class                 border  backgr. text    indicator child_border
+client.focused          #FFFFFF #FFFFFF #000000 #000000   #000000
+client.focused_inactive #333333 #5f676a #ffffff #484e50   #000000
+client.unfocused        #333333 #222222 #888888 #292d2e   #222222
+client.urgent           #2f343a #900000 #ffffff #900000   #900000
+client.placeholder      #000000 #0c0c0c #ffffff #000000   #0c0c0c
+
+# Hide titles
+for_window [class=".*"] border pixel 1
+
+# Screen brightness controls: Fn on laptop, Mod
+bindsym XF86MonBrightnessUp exec xbacklight -inc 20
+bindsym XF86MonBrightnessDown exec xbacklight -dec 20
+bindsym Mod4+F5 exec xbacklight -dec 20 # Win+F5 darkens
+bindsym Mod4+F6 exec xbacklight -inc 20 # Win+F6 lightens
+
+# Pulse Audio controls
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 -- '+5%' #increase sound volume
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -- '-5%' #decrease sound volume
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
+
+# Force pyplot windows to float
+for_window [title="^Figure "] floating enable
+# Do the same for R graphics
+for_window [title="^R Graphics:"] floating enable
+# Same for Evince
+for_window [class="^Evince"] floating enable
